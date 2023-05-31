@@ -24,6 +24,5 @@ def movload(fname):
             A[trial-1] = np.vstack((A[trial-1],a))
             # A[trial-1].extend(a)
 
-    print(A[0][0:2])
     fid.close()
     return A

@@ -17,21 +17,25 @@ def efc1_emg_subj(subjName):
     print(outFileName)
 
     D = pd.read_table(datFileName)
+    D = D.loc[:, ~D.columns.str.contains('^Unnamed')]
 
     oldBlock = -1
+    movList = []
     for i in range(len(D.BN)):
         if (oldBlock != D.BN[i]):
             # load mov file
             movPath = scriptPath + '/data/' + subjName + '/efc1_' + subjName[-2:] + '_' + '{:02d}.mov'.format(D.BN[i])
             mov = dl.movload(movPath)
+            movList.extend(mov)
             # print(mov[0])
             oldBlock = D.BN[i]
+            print(len(movList))
 
-    # print('Ali: ',movPath)
+    D['mov'] = movList
 
     ANA = D
     return ANA
 
 
 ANA = efc1_emg_subj('subj99')
-# print(ANA.loc[0])
+print(ANA)
