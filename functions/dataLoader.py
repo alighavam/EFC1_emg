@@ -1,5 +1,6 @@
 import numpy as np
 
+# loads .mov files given the path of the file. The .mov files have a specific custom hence the need for a custom function.
 def movload(fname):
     A = []
     fid = open(fname, 'rt')
@@ -26,3 +27,5 @@ def movload(fname):
 
     fid.close()
     return A
+
+

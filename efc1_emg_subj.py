@@ -19,6 +19,7 @@ def efc1_emg_subj(subjName):
     D = pd.read_table(datFileName)
     D = D.loc[:, ~D.columns.str.contains('^Unnamed')]
 
+    # reading mov files and appending each block to movList
     oldBlock = -1
     movList = []
     for i in range(len(D.BN)):
@@ -31,10 +32,14 @@ def efc1_emg_subj(subjName):
             oldBlock = D.BN[i]
             print(len(movList))
 
+    # adding the mov data to the dataframe
     D['mov'] = movList
 
-    ANA = D
-    return ANA
+    # reading emg data:
+
+
+
+    return D
 
 
 ANA = efc1_emg_subj('subj99')
