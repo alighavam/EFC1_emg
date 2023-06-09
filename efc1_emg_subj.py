@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import os
 
-from functions import dataLoader as dl
+from functions import dataLoader
 
 def efc1_emg_subj(subjName):
     scriptPath = os.getcwd()
@@ -19,14 +19,14 @@ def efc1_emg_subj(subjName):
     D = pd.read_table(datFileName)
     D = D.loc[:, ~D.columns.str.contains('^Unnamed')]
 
-    # reading mov files and appending each block to movList
+    # loading mov files and appending each block to movList
     oldBlock = -1
     movList = []
     for i in range(len(D.BN)):
         if (oldBlock != D.BN[i]):
             # load mov file
             movPath = scriptPath + '/data/' + subjName + '/efc1_' + subjName[-2:] + '_' + '{:02d}.mov'.format(D.BN[i])
-            mov = dl.movload(movPath)
+            mov = dataLoader.movload(movPath)
             movList.extend(mov)
             # print(mov[0])
             oldBlock = D.BN[i]
@@ -35,8 +35,8 @@ def efc1_emg_subj(subjName):
     # adding the mov data to the dataframe
     D['mov'] = movList
 
-    # reading emg data:
-
+    # loading emg data:
+    
 
 
     return D
