@@ -6,6 +6,7 @@ import os
 import matplotlib.pyplot as plt
 
 from functions import dataLoader
+from functions import emgHandler
 
 def efc1_emg_subj(subjName):
     scriptPath = os.getcwd()
@@ -48,8 +49,12 @@ def efc1_emg_subj(subjName):
         # loading emg and separating trials:
         emg_selected, fs = dataLoader.emgload(fname, riseThresh=0.5, fallThresh=0.5, debug=0)
 
-        # bandpass filtering the signals:
+        # down sampling the signals:
+        emg_selected, fs = emgHandler.downsample_emg(emg_selected, fs, target_fs=1000, debug=0)
+
+        # filtering the signals:
         
+
 
         # adding emg data of trials to emgList:
         emgList.extend(emg_selected)
@@ -57,7 +62,7 @@ def efc1_emg_subj(subjName):
     # adding emg data to the dataframe:
     D['emg'] = emgList
 
-    plt.plot(emg_selected[0][:,1])
+    plt.plot(D['emg'][0][:,0])
     plt.show()
 
     return D
