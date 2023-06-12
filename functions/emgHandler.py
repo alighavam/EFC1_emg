@@ -64,12 +64,62 @@ def find_trigger_rise_edge(trig, fs, riseThresh=0.5, fallThresh=0.5, debug=0):  
 
     return riseIdx, fallIdx
     
-
-def bandpass_emg(emg, fs, low=20, high=500, order=2):
+def downsample_emg(emg, fs, target_fs=1000, debug=0):
     
-    # designing the filter:
-    sos = signal.butter(order, [low, high], btype='bandpass', fs=fs, output='sos')
+    # resampled emg:
+    emg_resampled = []
 
-    # iterating through signals and filtering:
-    for i in range(emg):
+    # iterating through signals and downsampling with zero-phase anti-aliasing filter:
+    for i in range(len(emg)):
+        # selecting the emg signal of trial i:
+        emg_trial = emg[i]
+
+        # number of samples in the resampled signal:
+        target_len = int(np.floor(len(emg_trial[:,0])*target_fs/fs))
+
+        # making an empty array to contain the resampled signal:
+        emg_trial_resampled = np.empty((target_len, np.shape(emg_trial)[1]))
+
+        # iterating through emg channels:
+        for ch in range(np.shape(emg_trial)[1]):
+            # selecting the signal:
+            sig = emg_trial[:,ch]
+
+            # designing lowpass filter with cutoff frequency of target_fs/2:
+            sos = signal.butter(2, int(target_fs/2), btype='lowpass', fs=fs, output='sos')
+
+            # zero-phase low pass filtering the signal to avoid aliasing:
+            sig = signal.sosfiltfilt(sos, sig)
+
+            # downsampling the signal:
+            sig_resampled = signal.resample(sig, target_len)
+
+            # appending the resampled signal to the resampled trial:
+            emg_trial_resampled[:,ch] = sig_resampled
+
+            # plotting resampled against original signal:
+            if debug and i==0 and ch==0:
+                # time vector for plotting:
+                t_orig = np.linspace(0,len(sig)/fs,len(sig))
+                t_resampled = np.linspace(0,len(sig_resampled)/target_fs,len(sig_resampled))
+                print("Original Signal Length = {:d}".format(len(sig)))
+                print("Resampled Signal Length = {:d}".format(len(sig_resampled)))
+
+                # plotting:
+                plt.figure()
+                plt.plot(t_orig, sig, label='Original Signal')
+                plt.plot(t_resampled, sig_resampled, label='Resampled Signal')
+                plt.legend()
+                plt.show()
         
+        # appending the resampled trial to the resampled emg:
+        emg_resampled.append(emg_trial_resampled)
+
+    return emg_resampled, target_fs
+
+# def filter_emg(emg, fs, downsampleOption=0, target_fs=1000, low=20, high=500, order=2):
+    
+    
+
+
+
