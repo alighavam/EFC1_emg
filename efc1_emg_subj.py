@@ -52,9 +52,11 @@ def efc1_emg_subj(subjName):
         # down sampling the signals:
         emg_selected, fs = emgHandler.downsample_emg(emg_selected, fs, target_fs=1000, debug=0)
 
-        # filtering the signals:
-        
+        # filtering the signals - bandpass:
+        emg_selected = emgHandler.filter_emg(emg_selected, fs=fs, low=20, high=500, order=2, debug=0)
 
+        # rectifying the signals:
+        emg_selected = emgHandler.rectify_emg(emg_selected, debug=0)
 
         # adding emg data of trials to emgList:
         emgList.extend(emg_selected)
@@ -62,8 +64,8 @@ def efc1_emg_subj(subjName):
     # adding emg data to the dataframe:
     D['emg'] = emgList
 
-    plt.plot(D['emg'][0][:,0])
-    plt.show()
+    # saving the dataframe:
+    D.to_csv(outFileName)
 
     return D
 
