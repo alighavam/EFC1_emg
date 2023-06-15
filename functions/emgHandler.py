@@ -3,6 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from scipy import signal
 
+
+
 def find_trigger_rise_edge(trig, fs, riseThresh=0.5, fallThresh=0.5, debug=0):    # detect rising and falling edges of the trigger signal
     '''
         Description: Detects triggers from the trigger channel of the data.
@@ -64,10 +66,15 @@ def find_trigger_rise_edge(trig, fs, riseThresh=0.5, fallThresh=0.5, debug=0):  
 
     return riseIdx, fallIdx
     
+
+
 def downsample_emg(emg, fs, target_fs=1000, debug=0):
     
     # resampled emg:
     emg_resampled = []
+
+    # designing lowpass filter with cutoff frequency of target_fs/2:
+    sos = signal.butter(2, int(target_fs/2), btype='lowpass', fs=fs, output='sos')
 
     # iterating through signals and downsampling with zero-phase anti-aliasing filter:
     for i in range(len(emg)):
@@ -84,9 +91,6 @@ def downsample_emg(emg, fs, target_fs=1000, debug=0):
         for ch in range(np.shape(emg_trial)[1]):
             # selecting the signal:
             sig = emg_trial[:,ch]
-
-            # designing lowpass filter with cutoff frequency of target_fs/2:
-            sos = signal.butter(2, int(target_fs/2), btype='lowpass', fs=fs, output='sos')
 
             # zero-phase low pass filtering the signal to avoid aliasing:
             sig = signal.sosfiltfilt(sos, sig)
@@ -117,9 +121,89 @@ def downsample_emg(emg, fs, target_fs=1000, debug=0):
 
     return emg_resampled, target_fs
 
-# def filter_emg(emg, fs, downsampleOption=0, target_fs=1000, low=20, high=500, order=2):
+
+
+def filter_emg(emg, fs, low=20, high=500, order=2, debug=0):
+    # filtered emg:
+    emg_filtered = []
+
+    # designing bandpass filter:
+    sos = signal.butter(order, [low, high-1], btype='bandpass', fs=fs, output='sos')  # using 'sos' to avoid numerical errors
+
+    # iterating through signals and filtering:
+    for i in range(len(emg)):
+        # selecting the emg signal of trial i:
+        emg_trial = emg[i]
+
+        # making an empty array to contain the filtered signal:
+        emg_trial_filtered = np.empty((np.shape(emg_trial)[0], np.shape(emg_trial)[1]))
+
+        # iterating through emg channels:
+        for ch in range(np.shape(emg_trial)[1]):
+            # selecting the signal:
+            sig = emg_trial[:,ch]
+
+            # filtering the signal:
+            sig_filtered = signal.sosfiltfilt(sos, sig)
+
+            # appending the filtered signal to the emg_trial_filtered:
+            emg_trial_filtered[:,ch] = sig_filtered
+
+            # plotting filtered against original signal:
+            if debug and i==0 and ch==0:
+                # time vector for plotting:
+                t = np.linspace(0,len(sig)/fs,len(sig))
+
+                # plotting:
+                plt.figure()
+                plt.plot(t, sig, label='Original Signal')
+                plt.plot(t, sig_filtered, label='Filtered Signal')
+                plt.legend()
+                plt.show()
+        
+        # appending the resampled trial to the resampled emg:
+        emg_filtered.append(emg_trial_filtered)
+
+    return emg_filtered
     
     
 
+def rectify_emg(emg, debug=0):
+    # rectified emg:
+    emg_rectified = []
 
+    # iterating through signals and rectifying:
+    for i in range(len(emg)):
+        # selecting the emg signal of trial i:
+        emg_trial = emg[i]
 
+        # making an empty array to contain the rectified signal:
+        emg_trial_rectified = np.empty((np.shape(emg_trial)[0], np.shape(emg_trial)[1]))
+
+        # iterating through emg channels:
+        for ch in range(np.shape(emg_trial)[1]):
+            # selecting the signal:
+            sig = emg_trial[:,ch]
+
+            # rectifying the signal:
+            sig_rectified = np.absolute(sig)
+
+            # appending the rectified signal to the emg_trial_rectified:
+            emg_trial_rectified[:,ch] = sig_rectified
+
+            # plotting rectified against original signal:
+            if debug and i==0 and ch==0:
+                # time vector for plotting:
+                t = np.linspace(0,len(sig),len(sig))
+
+                # plotting:
+                plt.figure()
+                plt.plot(t, sig, label='Original Signal')
+                plt.plot(t, sig_rectified, label='Rectified Signal')
+                plt.legend()
+                plt.show()
+        
+        # appending the rectified trial:
+        emg_rectified.append(emg_trial_rectified)
+
+    return emg_rectified
