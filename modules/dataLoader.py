@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from functions import emgHandler
+from modules import emgHandler
 
 def movload(fname):
     # loads .mov files given the path of the file. The .mov files have a specific custom hence the need for a custom function

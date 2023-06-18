@@ -5,8 +5,8 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 
-from functions import dataLoader
-from functions import emgHandler
+from modules import dataLoader
+from modules import emgHandler
 
 def efc1_emg_subj(subjName):
     scriptPath = os.getcwd()
