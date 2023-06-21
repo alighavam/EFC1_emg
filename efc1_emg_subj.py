@@ -13,7 +13,7 @@ def efc1_emg_subj(subjName):
     datFileName = scriptPath + '/data/' + subjName + \
         '/efc1_' + subjName[-2:] + '.dat'   # input .dat file
     outFileName = scriptPath + '/analysis/' + subjName + \
-        '.csv'    # output file (saved to analyse folder)
+        '.pkl'    # output file (saved to analyse folder)
 
     print(datFileName)
     print(outFileName)
@@ -65,10 +65,7 @@ def efc1_emg_subj(subjName):
     D['emg'] = emgList
 
     # saving the dataframe:
-    D.to_csv(outFileName)
+    D.to_pickle(outFileName)
 
     return D
 
-
-ANA = efc1_emg_subj('subj99')
-print(ANA)
